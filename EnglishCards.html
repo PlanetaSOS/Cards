@@ -1,0 +1,366 @@
+<!DOCTYPE html> 
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarjetas de aprendizaje</title>
+    <style>
+        /* Estilos previos */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            color: #333;
+        }
+
+        .formulario {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            text-align: center;
+            width: 350px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .formulario:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .button {
+            background-color: hwb(340 16% 0%);
+            color: white;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+            position: relative; /* Agregado para asegurar que los efectos de transform se apliquen correctamente */
+        }
+
+        .button-limpiar {
+            background-color: hwb(340 16% 0%);
+            color: white;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+            position: relative; /* Agregado para asegurar que los efectos de transform se apliquen correctamente */
+        }
+
+        .button:hover {
+            transform: translateY(-6px) scale(1.05); /* Desplazamiento y aumento de tamaño para un efecto 3D más notorio */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Sombra más fuerte en hover */
+        }
+
+        .button-limpiar:hover {
+            transform: translateY(-6px) scale(1.05); /* Desplazamiento y aumento de tamaño para un efecto 3D más notorio */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Sombra más fuerte en hover */
+        }
+        .button:active .front {
+        transform: translateY(-2px);
+        }
+        .button:active{
+            transform: translateY(-2px) scale(1); /* Suaviza el efecto al hacer clic */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .button-limpiar:active {
+            transform: translateY(-2px) scale(1); /* Suaviza el efecto al hacer clic */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra más pequeña al hacer clic */
+        }
+        .button-limpiar:active .front {
+        transform: translateY(-2px);
+        }
+        .button:focus:not(:focus-visible){
+        outline:none;
+        }
+        .button-limpiar:focus:not(:focus-visible){
+        outline:none; 
+        }
+        .front{
+        display: block;
+        padding:6px 8px;
+        border-radius:12px;
+        font-size:1.25rem;
+        background:hwb(340 16% 0%);
+        color:white;
+        will-change:transform;
+        transition:transform 250ms;
+        transform: translateY(-6px);
+        }
+
+        .tarjetas-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 350px;
+            max-width: 100%;
+            height: 250px;
+            overflow: auto;
+            margin-top: 40px;
+        }
+
+        .tarjeta {
+            width: 100%;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.5s ease;
+            opacity: 0;
+            display: none;
+            box-sizing: border-box;
+            position: absolute; /* Permitir que las tarjetas se superpongan */
+            top: 0;
+            left: 0;
+            right: 0;
+            opacity: 0; /* Hacer que las tarjetas estén invisibles por defecto */; /* Transición para hacer más suave la visibilidad */
+        }
+
+        .tarjeta.visible {
+            display:block;
+            opacity: 1;
+        }
+
+        .titulo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.5)
+        }
+
+        .descripcion {
+            font-size: 1rem;
+            color: rgba(0, 0, 0, 0.5);
+            margin-top: 10px;
+            padding: 10px;
+            line-height: 1.5;
+        }
+        .sinonimos, .antonimos {
+        font-size: 0.9rem;
+        color: rgba(0, 0, 0, 0.6);
+        margin-top: 10px;
+         padding: 5px;
+        }
+
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .prev {
+            left: 10px;
+        }
+
+        .next {
+            right: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .formulario {
+                width: 90%;
+            }
+
+            .tarjeta {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="formulario" id="formulario">
+        <h1>Tarjetas de aprendizaje</h1>
+        <input type="text" id="palabra" placeholder="Escribe una palabra" required>
+        <textarea id="definicion" placeholder="Escribe la definición" required></textarea>
+        <button class="button" onclick="agregarTarjeta()">Agregar Tarjeta</button>
+        <button class="button-limpiar" onclick="limpiarLocalStorage()">Limpiar Tarjetas</button>
+    </div>
+
+    <div class="nav-container">
+        <button class="nav-button prev" onclick="mostrarTarjetaAnterior()">◀</button>
+        <button class="nav-button next" onclick="mostrarTarjetaSiguiente()">▶</button>
+    </div>
+
+    <!-- Contenedor de tarjetas -->
+    <div class="tarjetas-container" id="tarjetas-container">
+        <!-- Las tarjetas se mostrarán aquí -->
+    </div>
+
+<script>
+
+    async function obtenerSinonimosYAntonimos(palabra) {
+       try {
+        // Solicitar sinónimos
+        const sinonimosResponse = await fetch(`https://api.datamuse.com/words?rel_syn=${palabra}`);
+        const sinonimosData = await sinonimosResponse.json();
+        console.log(tarjetas);
+        const sinonimos = sinonimosData.map(item => item.word);
+
+        // Solicitar antónimos
+        const antonimosResponse = await fetch(`https://api.datamuse.com/words?rel_ant=${palabra}`);
+        const antonimosData = await antonimosResponse.json();
+        const antonimos = antonimosData.map(item => item.word);
+
+        return { sinonimos, antonimos };
+    } catch (error) {
+        console.error("Error al obtener los sinónimos y antónimos:", error);
+        return { sinonimos: [], antonimos: [] }; // Si ocurre un error, devolver arrays vacíos
+    }
+
+    }
+        let tarjetas = [];
+        let indiceTarjeta=0;
+
+        // Cargar las tarjetas desde el localStorage cuando la página se recarga
+        function cargarTarjetasDesdeLocalStorage() {
+            const tarjetasGuardadas = JSON.parse(localStorage.getItem('tarjetas'));
+            if (tarjetasGuardadas) {
+                tarjetas = tarjetasGuardadas;
+                cargarTarjetas();
+            }
+        }
+
+        // Función para agregar la tarjeta
+        async function agregarTarjeta() {
+            const palabra = document.getElementById('palabra').value.trim();
+            const definicion = document.getElementById('definicion').value.trim();
+
+            if (!palabra || !definicion) {
+                alert("Por favor, completa ambos campos.");
+                return;
+            }
+            const { sinonimos, antonimos } = await obtenerSinonimosYAntonimos(palabra);
+
+            const sinonimosTexto = sinonimos.length > 0 ? sinonimos.join(", ") : "No se encontraron sinónimos";
+            const antonimosTexto = antonimos.length > 0 ? antonimos.join(", ") : "No se encontraron antónimos";
+
+            const tarjeta = { 
+                palabra, 
+                definicion,
+                sinonimos:sinonimos.join(","),
+                antonimos:antonimos.join(",")
+             };
+            tarjetas.push(tarjeta);
+
+            // Guardar las tarjetas en el localStorage
+            localStorage.setItem('tarjetas', JSON.stringify(tarjetas));
+
+            document.getElementById('palabra').value = '';
+            document.getElementById('definicion').value = '';
+
+            // Volver al carrusel
+            document.getElementById('formulario').style.display = 'none';
+            document.getElementById('tarjetas-container').style.display = 'flex';
+
+            cargarTarjetas();
+        }
+
+        // Función para cargar las tarjetas en el carrusel
+    function cargarTarjetas() {
+    const tarjetasContainer = document.getElementById('tarjetas-container');
+    tarjetasContainer.innerHTML = ''; // Limpiar el contenedor de tarjetas
+
+    tarjetas.forEach((tarjeta, index) => {
+        const tarjetaElement = document.createElement('div');
+        tarjetaElement.classList.add('tarjeta');
+        tarjetaElement.id = 'tarjeta${index + 1}';
+
+        // Si no hay sinónimos o antónimos, usa un mensaje por defecto
+        const sinonimosTexto = tarjeta.sinonimos.length > 0 ? tarjeta.sinonimos : "No se encontraron sinónimos";
+        const antonimosTexto = tarjeta.antonimos.length > 0 ? tarjeta.antonimos : "No se encontraron antónimos";
+
+        tarjetaElement.innerHTML = `
+    <div class="titulo">${tarjeta.palabra}</div>
+    <div class="descripcion">${tarjeta.definicion}</div>
+    <div class="sinonimos"><strong>Sinónimos:</strong> ${sinonimosTexto}</div>
+    <div class="antonimos"><strong>Antónimos:</strong> ${antonimosTexto}</div>
+    <button class="button" onclick="irFormulario()">Agregar Tarjeta</button>
+`;
+
+        tarjetasContainer.appendChild(tarjetaElement);
+    });
+
+    mostrarTarjeta(); // Asegura que se muestren las tarjetas cargadas
+}
+
+        // Función para mostrar la tarjeta actual
+        function mostrarTarjeta() {
+    const tarjetasElements = document.querySelectorAll('.tarjeta');
+    
+    if (tarjetasElements.length > 0) {
+        tarjetasElements.forEach(tarjeta => tarjeta.classList.remove('visible'));  // Ocultar todas las tarjetas
+        tarjetasElements[indiceTarjeta].classList.add('visible');  // Mostrar la tarjeta actual
+    }
+}
+
+        // Función para mostrar la siguiente tarjeta
+        function mostrarTarjetaSiguiente() {
+            if (indiceTarjeta < tarjetas.length - 1) {
+                indiceTarjeta++;
+            } else {
+                indiceTarjeta = 0; // Volver a la primera tarjeta
+            }
+            mostrarTarjeta();
+        }
+
+        // Función para mostrar la tarjeta anterior
+        function mostrarTarjetaAnterior() {
+            if (indiceTarjeta > 0) {
+                indiceTarjeta--;
+            } else {
+                indiceTarjeta = tarjetas.length - 1; // Volver a la última tarjeta
+            }
+            mostrarTarjeta();
+        }
+
+        // Ir al formulario
+        function irFormulario() {
+            document.getElementById('formulario').style.display = 'block';
+            document.getElementById('tarjetas-container').style.display = 'none';
+        }
+
+        // Limpiar las tarjetas y el localStorage
+        function limpiarLocalStorage() {
+            tarjetas = [];
+            indiceTarjeta = 0;
+            localStorage.removeItem('tarjetas'); // Eliminar las tarjetas guardadas
+            cargarTarjetas();
+        }
+
+        // Cargar las tarjetas al iniciar
+        cargarTarjetasDesdeLocalStorage();
+
+    </script>
+</body>
+</html>
